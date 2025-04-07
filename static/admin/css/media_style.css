@@ -1,0 +1,30 @@
+#result_list td,
+#result_list th {
+	vertical-align: middle !important;
+}
+
+#result_list {
+	min-width: max-content !important;
+}
+
+.created_at {
+	color: #2ecc71;
+}
+
+.updated_at {
+	color: #f1c40f;
+}
+
+.preview__image {
+	width: 50px;
+	height: 50px;
+	border: 2px outset #81d4fa;
+	border-radius: 50%;
+	filter: brightness(0.64);
+	transition: border 150ms linear, filter 150ms linear;
+}
+
+.preview__image:hover {
+	border: 2px outset #4ac1f7;
+	filter: brightness(1);
+}
