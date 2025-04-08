@@ -2,25 +2,25 @@
 <html lang="en">
 
 <head>
-    {% include "product/partials/_head.html" %}
+    {% include "product/shared/partials/_head.html" %}
 </head>
 
 <body>
-    {% include "product/partials/_preloader.html" %}
+    {% include "product/shared/partials/_preloader.html" %}
     <header class="header">
-        {% include "product/partials/_topbar.html" %}
-        {% include "product/partials/_middlebar.html" %}
-        {% include "product/partials/_navbar.html" %}
+        {% include "product/shared/partials/_topbar.html" %}
+        {% include "product/shared/partials/_middlebar.html" %}
+        {% include "product/shared/partials/_navbar.html" %}
     </header>
 
     <main class="main">
         {% block content %}{% endblock %}
     </main>
 
-    {% include "product/partials/_footer.html" %}
-    {% include "product/partials/_scroll.html" %}
-    {% include "product/partials/_modal_shop.html" %}
-    {% include "product/partials/_scripts.html" %}
+    {% include "product/shared/partials/_footer.html" %}
+    {% include "product/shared/partials/_scroll.html" %}
+    {% include "product/shared/partials/_modal_shop.html" %}
+    {% include "product/shared/partials/_scripts.html" %}
 </body>
 
 </html>

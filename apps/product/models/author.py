@@ -1,8 +1,17 @@
 from django.db import models
+from django.core.validators import FileExtensionValidator
 from .gender import Gender
 
 
 class Author(models.Model):
+    image = models.FileField(
+        upload_to="authors/",
+        validators=[
+            FileExtensionValidator(["png", "jpg", "jpeg", "svg", "webp"])
+        ],
+        blank=True,
+        null=True,
+    )
     gender = models.ForeignKey(
         Gender,
         on_delete=models.SET_NULL,
@@ -38,7 +47,7 @@ class Author(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.name}  {self.surname}" 
+        return f"{self.name}  {self.surname}"
 
     class Meta:
         ordering = ("-created_at",)

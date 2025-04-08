@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.core.validators import FileExtensionValidator
 
 
@@ -28,8 +29,11 @@ class Category(models.Model):
         verbose_name="Updated At",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse("product:category_detail", kwargs={"id": self.id})
 
     class Meta:
         ordering = ("name",)

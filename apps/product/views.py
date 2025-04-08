@@ -1,14 +1,21 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-
-
-from django.db.models import Q, F, Value, CharField, FloatField
-from django.db.models.functions import Concat, Cast, Coalesce
+from django.db.models import Count
+from .models import Category, Product
 
 
 def index(request) -> HttpResponse:
+    categories = Category.objects.annotate(products_count=Count("products"))
+    products = Product.objects.all()
+
     context = {
         "page_title": "Home",
+        "categories": categories,
+        "products": products,
+        "last_categories": categories[:12],
+        "last_products": products[:5],
+        "hot_products": products.filter(discount__gte=20)[:5],
+        "low_price_products": products.filter(price__lte=35)[:5],
     }
     return render(request, "product/pages/index.html", context)
 
@@ -73,6 +80,20 @@ def author_detail(request, id) -> HttpResponse:
     return render(request, "author/tag_products.html", context)
 
 
+def brand_list(request) -> HttpResponse:
+    context = {
+        "page_title": "Brands",
+    }
+    return render(request, "author/brand_list.html", context)
+
+
+def brand_products(request, id) -> HttpResponse:
+    context = {
+        "page_title": "Brands IDs",
+    }
+    return render(request, "author/brand_products.html", context)
+
+
 def faq(request) -> HttpResponse:
     context = {
         "page_title": "FAQ",
@@ -93,68 +114,9 @@ def contacts(request) -> HttpResponse:
     }
     return render(request, "product/contacts.html", context)
 
-def error_404(request) -> HttpResponse:
+
+def error_404(request, exception) -> HttpResponse:
     context = {
         "page_title": "page not found",
     }
     return render(request, "product/404.html", context)
-
-
-# def index(request):
-#     return render(request, "product/index.html")
-
-
-# def allProducts(request):
-#     return render(request, "product/shop-grid-3.html")
-
-
-# def product_detail(request):
-#     return render(request, "product/shop-single.html")
-
-
-# & - AND // VE
-# | - OR  // VE YA
-
-
-# Product.objects.filter(
-# +      Q(author_id=1)
-# AND    &
-# +      Q(author__name="Aytac")
-# )
-
-# Product.objects.filter(
-# -      Q(author_id=1)
-# OR     |
-# +      Q(author__name="Aytac")
-# )
-
-# Product.objects.filter(Q(author_id=1) | Q(author__name="Aytac"))
-
-
-# Annotate
-
-# fullad = Author.objects.annotate(
-#     full_name=Concat(
-#         F("name"), Value(" "), F("surname"), Value(" -> "), Cast(F("age"), CharField())
-#     )
-# )
-
-
-# from django.db.models import Q, F, Value, CharField, FloatField
-# from django.db.models.functions import Concat, Cast, Coalesce
-
-# cavab = Product.objects.annotate(
-#     tax=Coalesce(F("tax_price"), 0, output_field=FloatField()),
-#     discount=Coalesce(F("discount_price"), 0, output_field=FloatField())
-# )
-
-
-# from django.db.models import F, Value, FloatField
-# from django.db.models.functions import Coalesce
-
-# cavab = Product.objects.annotate(
-#     tax=Coalesce(F("tax_price"), Value(0.0), output_field=FloatField()),
-#     discount=Coalesce(F("discount_price"), Value(0.0), output_field=FloatField())
-# )
-
-# list(cavab.values("name", "tax", "discount"))

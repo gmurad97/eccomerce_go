@@ -1,11 +1,21 @@
+import math
 from django.db import models
-from django.urls import reverse 
+from django.core.validators import FileExtensionValidator
+from django.urls import reverse
 from .author import Author
 from .tag import Tag
 from .category import Category
 
 
 class Product(models.Model):
+    poster = models.FileField(
+        upload_to="products/%Y/%m/%d/",
+        validators=[
+            FileExtensionValidator(["png", "jpg", "jpeg", "svg", "webp"]),
+        ],
+        blank=True,
+        null=True,
+    )
     author = models.ForeignKey(
         Author,
         on_delete=models.CASCADE,
@@ -61,16 +71,16 @@ class Product(models.Model):
         return self.name
 
     def get_absolute_url(self) -> str:
-        return reverse("product:product_detail",kwargs={"id": self.id})
+        return reverse("product:product_detail", kwargs={"id": self.id})
+
+    def get_price_with_tax(self) -> float:
+        return math.ceil((self.price + self.tax_price) * 100) / 100
 
     def get_final_price(self) -> float:
-        price_with_tax = self.price + self.tax_price
-        return price_with_tax - (price_with_tax * (self.discount / 100))
+        price_with_discount = self.price - (self.price * (self.discount / 100))
+        return math.ceil(price_with_discount * 100) / 100 + self.tax_price
 
     class Meta:
         ordering = ("-created_at",)
         verbose_name = "Product"
         verbose_name_plural = "Products"
-
-    def __str__(self):
-        return self.name

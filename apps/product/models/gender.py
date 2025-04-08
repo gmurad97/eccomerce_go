@@ -19,5 +19,10 @@ class Gender(models.Model):
         verbose_name="Updated At",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
+
+    class Meta:
+        ordering = ("-created_at",)
+        verbose_name = "Gender"
+        verbose_name_plural = "Genders"
