@@ -22,6 +22,10 @@ urlpatterns = [
     # Brands
     # path("brands/", views.brand_list, name="brand_list"),
     # path("brands/<int:id>/", views.brand_products, name="brand_roducts"),
+    # Auth
+    # path("login/", views.login, name="login"),
+    # path("register/", views.register, name="register"),
+    # path("profile/<int:id>/", views.profile, name="profile"),
     # Statics
     path("faq/", views.faq, name="faq"),
     path("about/", views.about, name="about"),
