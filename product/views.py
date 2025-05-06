@@ -1,213 +1,226 @@
-from django.http import Http404, HttpResponseNotFound
-from django.shortcuts import render, redirect
-from django.db.models import Q, F, Value, CharField, FloatField, ExpressionWrapper, Count
-from django.db.models.functions import Concat, Cast, Coalesce, Round
-
-
+from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404, render, redirect
+from django.db.models import (
+    F,
+    FloatField,
+    DecimalField,
+    ExpressionWrapper,
+    Count,
+)
+from django.db.models.functions import Coalesce, Round
 from product.forms import ProductForm
-
 from product.models import *
 
 
 def index(request):
-    context = {
-        "category": Category.objects.annotate(
-            product_count = Count("products")
-        ).order_by('-time_create')[:10],
-        "product": Product.objects.annotate(
-            tax= Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"),0, output_field=FloatField())
-            ).annotate(
-                total_price = F("price") *(1- F("discount_p") / 100) + F("tax")
+    products_qs = Product.objects.annotate(
+        tax_value=Coalesce(F("tax_price"), 0.00, output_field=DecimalField()),
+        discount_value=Coalesce(
+            F("discount"), 0.00, output_field=DecimalField()
+        ),
+    ).annotate(
+        final_price=Round(
+            ExpressionWrapper(
+                F("price") * (1.00 - F("discount_value") / 100.00)
+                + F("tax_value"),
+                output_field=DecimalField(),
             ),
+            2,
+            output_field=FloatField(),
+        ),
+        total_price=Round(
+            ExpressionWrapper(
+                F("price") + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+    )
 
-            # total_price=ExpressionWrapper(
-            #     # (F("price") * (1 - Coalesce(F("discount__name"), 0) / 100)) + Coalesce(F("tax_price"), 0),
-            #     # output_field=FloatField()
-            # )
-        
-        # "product_discount": Product.objects.annotate(
-        #  discount_price=ExpressionWrapper(
-        #             (F("price")-F("discount_price"))
-        #         )
-        #     )
+    categories = Category.objects.annotate(
+        product_count=Count("products")
+    ).order_by("-created_at")
 
-        "discount_products": Product.objects.annotate(
-            tax= Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"),0, output_field=FloatField())
-            ).annotate(
-                total_price = F("price") *(1- F("discount_p") / 100) + F("tax")
-            ).filter(discount__name__gt=0),
-
-
-        "last_products": Product.objects.annotate(
-            tax= Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"),0, output_field=FloatField())
-            ).annotate(
-                total_price = Round(F("price") *(1- F("discount_p") / 100) + F("tax"),2
-                )
-            ).order_by('-id')[:5]
-            
+    context = {
+        "page_title": "Home",
+        "products": products_qs[:12],
+        "categories": categories[:12],
+        "discount_products": products_qs.filter(discount_value__gt=0),
+        "last_products": products_qs.order_by("-id")[:5],
     }
-    
 
-    # print(context)
     return render(request, "product/index.html", context)
 
-def allProducts(request):
-    return render(request, "product/shop-grid-3.html")
 
-def product_detail(request,pd):
-    single_product = Product.objects.annotate(
-            tax= Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"),0, output_field=FloatField())
-            ).annotate(
-                total_price = F("price") *(1- F("discount_p") / 100) + F("tax")
-            ).get(id=pd)
-    
+def home(request):
+    return redirect(reverse("product:index"), permanent=True)
+
+
+def product_list(request):
+    products_qs = Product.objects.annotate(
+        tax_value=Coalesce(F("tax_price"), 0.00, output_field=DecimalField()),
+        discount_value=Coalesce(
+            F("discount"), 0.00, output_field=DecimalField()
+        ),
+    ).annotate(
+        final_price=Round(
+            ExpressionWrapper(
+                F("price") * (1.00 - F("discount_value") / 100.00)
+                + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+        total_price=Round(
+            ExpressionWrapper(
+                F("price") + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+    )
+
+    categories = Category.objects.annotate(
+        product_count=Count("products")
+    ).order_by("-created_at")
+
+    context = {
+        "page_title": "Products",
+        "products": products_qs,
+        "categories": categories[:12],
+    }
+
+    return render(request, "product/products.html", context)
+
+
+def product_detail(request, product_id):
+    product_qs = Product.objects.annotate(
+        tax_value=Coalesce(F("tax_price"), 0.00, output_field=DecimalField()),
+        discount_value=Coalesce(
+            F("discount"), 0.00, output_field=DecimalField()
+        ),
+    ).annotate(
+        final_price=Round(
+            ExpressionWrapper(
+                F("price") * (1.00 - F("discount_value") / 100.00)
+                + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+        total_price=Round(
+            ExpressionWrapper(
+                F("price") + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+    )
+
+    single_product = product_qs.get(id=product_id)
+
     product_tags = single_product.tags.all()
 
     if product_tags.exists():
-        related_products = Product.objects.annotate(
-            tax=Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"), 0, output_field=FloatField())
-        ).annotate(
-            total_price=F("price") * (1 - F("discount_p") / 100) + F("tax")
-        ).filter(tags__in=product_tags).exclude(id=single_product.id).order_by("-time_create")[:4]
+        related_products = (
+            product_qs.filter(tags__in=product_tags)
+            .exclude(id=single_product.id)
+            .order_by("-created_at")[:4]
+        )
     else:
-        related_products = Product.objects.annotate(
-            tax= Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"),0, output_field=FloatField())
-            ).annotate(
-                total_price = F("price") *(1- F("discount_p") / 100) + F("tax")
-            ).filter(category=single_product.category).order_by("-time_create")[:4]
+        related_products = product_qs.filter(
+            category=single_product.category
+        ).order_by("-created_at")[:4]
 
     context = {
+        "page_title": "Product Detail",
         "product": single_product,
-        "related_products": related_products
-    }
-    return render(request, "product/shop-single.html", context)
-
-
-def pageNotFound(request, exception):
-    return HttpResponseNotFound("UPSSS! Sehife tapilmadi")
-
-def all_categories(request):
-    context= {
-        "nav_cat":False,
-        "category_all":Category.objects.annotate(cat_count=Count("products")).filter(status=True)
+        "related_products": related_products,
     }
 
-    return render(request, "product/category.html", context)
+    return render(request, "product/product_detail.html", context)
 
-def category_products(request,c_id):
-    try:
-        category = Category.objects.get(id=c_id)
-    except:
-        raise Http404()
-    
-    category_products = Product.objects.filter(status=True).filter(category=c_id).annotate(
-            tax= Coalesce(F("tax_price"), 0, output_field=FloatField()),
-            discount_p=Coalesce(F("discount__name"),0, output_field=FloatField())
-            ).annotate(total_price = Round(F("price") *(1- F("discount_p") / 100) + F("tax"),2))
-    
-    categories = Category.objects.annotate(product_count=Count("products"))[:10]
 
-    context={
-        "category_products": category_products,
-        "category_products_count": category_products.count(),
-        "category": category,
-        "categories": categories,
-    
-    }
-    return render(request, "product/shop-grid.html",context)
-
-def product_create_view(request):
-
-    # request => method: GET,  -datani getir
-    # request => method: POST, -datani gonder db-ya
-    # context["form"] = form
-    
+def product_add(request):
     context = {}
     form = ProductForm()
 
     if request.method == "POST":
-        # print(request.POST)
-        # name = request.POST.get("name")
         form = ProductForm(data=request.POST)
-        # form = ProductForm(request.POST, request.FILES)
-     
-        
+
         if form.is_valid():
-            # print(form)
             form.save(commit=True)
-            return redirect('product:index')
+            return redirect("product:index")
         else:
             print(form.errors)
-            # form = ProductForm()
     else:
         form = ProductForm()
-        
-    context['form'] = form
 
-    return render(request, "product/vendor-add-product.html", context)
+    context["form"] = form
+    context["page_title"] = "Product Add"
 
-
-
+    return render(request, "product/product_add.html", context)
 
 
+def category_list(request):
+    categories = Category.objects.annotate(
+        product_count=Count("products")
+    ).order_by("-created_at")
+
+    context = {
+        "page_title": "Categories",
+        "categories": categories[:12],
+    }
+
+    return render(request, "product/category.html", context)
 
 
+def category_products(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    categories = Category.objects.annotate(
+        product_count=Count("products")
+    ).order_by("-created_at")
+
+    products_qs = Product.objects.annotate(
+        tax_value=Coalesce(F("tax_price"), 0.00, output_field=DecimalField()),
+        discount_value=Coalesce(
+            F("discount"), 0.00, output_field=DecimalField()
+        ),
+    ).annotate(
+        final_price=Round(
+            ExpressionWrapper(
+                F("price") * (1.00 - F("discount_value") / 100.00)
+                + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+        total_price=Round(
+            ExpressionWrapper(
+                F("price") + F("tax_value"),
+                output_field=DecimalField(),
+            ),
+            2,
+            output_field=FloatField(),
+        ),
+    )
+
+    context = {
+        "page_title": "Category Products",
+        "products": products_qs.filter(category=category_id),
+        "category": category,
+        "categories": categories,
+    }
+
+    return render(request, "product/category_products.html", context)
 
 
-
-
-
-
-# & - AND // VE
-# | - OR  // VE YA
-
-
-# Product.objects.filter(
-# +      Q(author_id=1)
-# AND    &
-# +      Q(author__name="Aytac")
-#)
-
-# Product.objects.filter(
-# -      Q(author_id=1)
-# OR     |
-# +      Q(author__name="Aytac")
-#)
-
-# Product.objects.filter(Q(author_id=1) | Q(author__name="Aytac"))
-
-
-
-# Annotate
-
-# fullad = Author.objects.annotate(
-#     full_name=Concat(
-#         F("name"), Value(" "), F("surname"), Value(" -> "), Cast(F("age"), CharField())
-#     )
-# )
-
-
-# from django.db.models import Q, F, Value, CharField, FloatField
-# from django.db.models.functions import Concat, Cast, Coalesce
-
-# cavab = Product.objects.annotate(
-#     tax=Coalesce(F("tax_price"), 0, output_field=FloatField()),
-#     discount=Coalesce(F("discount_price"), 0, output_field=FloatField())
-# )
-
-
-# from django.db.models import F, Value, FloatField
-# from django.db.models.functions import Coalesce
-
-# cavab = Product.objects.annotate(
-#     tax=Coalesce(F("tax_price"), Value(0.0), output_field=FloatField()),
-#     discount=Coalesce(F("discount_price"), Value(0.0), output_field=FloatField())
-# )
-
-# list(cavab.values("name", "tax", "discount"))
+def page_not_found(request, exception):
+    return HttpResponseNotFound("UPSSS! Sehife tapilmadi")

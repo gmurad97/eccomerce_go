@@ -1,15 +1,14 @@
-from django.contrib import admin
-from django.urls import path    
-from .views import *
+from django.urls import path
+from . import views
 
-app_name= "product"
+app_name = "product"
 
 urlpatterns = [
-    path('', index),
-    path('home', index, name='index'),
-    path('allProducts', allProducts, name='allProducts'),
-    path('product_detail/<int:pd>', product_detail, name='product_detail'),
-    path('product_create_view', product_create_view, name='product_create'),
-    path('all_categories', all_categories, name='all_categories'),
-    path('categories/<int:c_id>', category_products, name='category_products'),
+    path("", views.index, name="index"),
+    path("home/", views.home, name="home"),
+    path("products/", views.product_list, name="product_list"),
+    path("products/<int:product_id>/", views.product_detail, name="product_detail"),
+    path("products/add/", views.product_add, name="product_add"),
+    path("categories/", views.category_list, name="category_list"),
+    path("categories/<int:category_id>/", views.category_products, name="category_products"),
 ]

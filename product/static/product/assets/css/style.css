@@ -132,9 +132,7 @@ Table of contents
   --footer-text-color: #F5FAFF;
 }
 
-.errorlist .nonfield li{
-  color: red!important;
-}
+
 
 /*====================
 3. General css
@@ -4460,6 +4458,16 @@ label {
   letter-spacing: 1px;
   text-transform: uppercase;
   border-radius: 50px;
+}
+
+.product-img span.type:nth-child(1) {
+  top: 0px;
+}
+.product-img span.type:nth-child(2) {
+  top: 30px;
+}
+.product-img span.type:nth-child(3) {
+  top: 60px;
 }
 
 .product-item .type.new{
