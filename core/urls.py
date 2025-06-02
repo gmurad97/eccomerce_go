@@ -18,8 +18,11 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.admin import AdminSite
 from django.urls import include, path
 from product.views import page_not_found
+from debug_toolbar.toolbar import debug_toolbar_urls
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -29,5 +32,14 @@ urlpatterns = [
 
 handler404 = page_not_found
 
+
+class MyAdminSite(AdminSite):
+    site_header = "Панель управления"
+    site_title = "Админка проекта"
+    index_title = "Добро пожаловать"
+
+admin_site = MyAdminSite(name="myadmin")
+
 if settings.DEBUG:
+    urlpatterns += debug_toolbar_urls()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
