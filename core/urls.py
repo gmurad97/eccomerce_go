@@ -34,9 +34,10 @@ handler404 = page_not_found
 
 
 class MyAdminSite(AdminSite):
-    site_header = "Панель управления"
-    site_title = "Админка проекта"
-    index_title = "Добро пожаловать"
+    AdminSite.site_header = "Панель управления"
+    AdminSite.site_title = "Админка проекта"
+    AdminSite.index_title = "Добро пожаловать"
+
 
 admin_site = MyAdminSite(name="myadmin")
 

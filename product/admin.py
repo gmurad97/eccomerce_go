@@ -5,7 +5,7 @@ from .models import *
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(admin.ModelAdmin[Tag]):
     list_display = ("name", "created_at_tag", "updated_at_tag", "status")
     list_display_links = ("name",)
     list_editable = ("status",)
@@ -13,7 +13,7 @@ class TagAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at_tag", "updated_at_tag")
 
     @admin.display(description="Yaranma tarixi")
-    def created_at_tag(self, obj):
+    def created_at_tag(self, obj: Tag):
         return obj.created_at.strftime("%d.%m.%Y %H:%M")
 
     @admin.display(description="Yenilənmə tarixi")
