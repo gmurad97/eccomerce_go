@@ -1,4 +1,4 @@
-from django.http import HttpResponseNotFound
+from django.http import HttpRequest, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import (
     F,
@@ -92,11 +92,10 @@ def product_list(request):
         "products": products_qs,
         "categories": categories[:12],
     }
-
     return render(request, "product/products.html", context)
 
 
-def product_detail(request, product_id):
+def product_detail(request, product_id: int):
     product_qs = Product.objects.annotate(
         tax_value=Coalesce(F("tax_price"), 0.00, output_field=DecimalField()),
         discount_value=Coalesce(
@@ -129,7 +128,7 @@ def product_detail(request, product_id):
     if product_tags.exists():
         related_products = (
             product_qs.filter(tags__in=product_tags)
-            .exclude(id=single_product.id)
+            .exclude(id=single_product.pk)
             .order_by("-created_at")[:4]
         )
     else:
