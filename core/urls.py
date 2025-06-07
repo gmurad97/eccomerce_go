@@ -22,13 +22,25 @@ from django.contrib.admin import AdminSite
 from django.urls import include, path
 from product.views import page_not_found
 from debug_toolbar.toolbar import debug_toolbar_urls
-
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from product.api.views import HelloView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("ckeditor/", include("ckeditor_uploader.urls")),
     path("", include("product.urls", namespace="product")),
     path("api/v1/", include("product.api.urls")),
+    path(
+        "api/v1/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
+    ),  # получить токены
+    path(
+        "api/v1/token/refresh/",
+        TokenRefreshView.as_view(),
+        name="token_refresh",
+    ),  # обновить access
+    path(
+        "api/v1/hello/", HelloView.as_view(), name="hello"
+    ),  # защищенный эндпоинт
 ]
 
 handler404 = page_not_found
