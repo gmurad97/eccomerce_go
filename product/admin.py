@@ -6,6 +6,8 @@ from .models import *
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    model = Tag
+
     list_display = ("name", "created_at_tag", "updated_at_tag", "status")
     list_display_links = ("name",)
     list_editable = ("status",)
