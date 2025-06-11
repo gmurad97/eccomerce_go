@@ -1,13 +1,23 @@
+from datetime import datetime
+from typing import cast
 from django.contrib import admin
 from django.utils.html import format_html
 from django.templatetags.static import static
-from .models import *
+from .models import (
+    Tag,
+    Category,
+    Gender,
+    Author,
+    ProductImage,
+    Product,
+    SaleProduct,
+    NewCollection,
+)
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(admin.ModelAdmin):  # type: ignore
     model = Tag
-
     list_display = ("name", "created_at_tag", "updated_at_tag", "status")
     list_display_links = ("name",)
     list_editable = ("status",)
@@ -15,7 +25,8 @@ class TagAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at_tag", "updated_at_tag")
 
     @admin.display(description="Yaranma tarixi")
-    def created_at_tag(self, obj: Tag):
+    def created_at_tag(self, obj: Tag) -> str:
+        created_at = cast(datetime, obj.created_at)
         return obj.created_at.strftime("%d.%m.%Y %H:%M")
 
     @admin.display(description="Yenilənmə tarixi")
