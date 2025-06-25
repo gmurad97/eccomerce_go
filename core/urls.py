@@ -20,7 +20,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.admin import AdminSite
 from django.urls import include, path
-from product.views import page_not_found
 from debug_toolbar.toolbar import debug_toolbar_urls
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from product.api.views import HelloView
@@ -42,8 +41,6 @@ urlpatterns = [
         "api/v1/hello/", HelloView.as_view(), name="hello"
     ),  # защищенный эндпоинт
 ]
-
-handler404 = page_not_found
 
 
 class MyAdminSite(AdminSite):

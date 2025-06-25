@@ -1,22 +1,22 @@
 from django.urls import path
 from . import views
+from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 app_name = "product"
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("home/", views.home, name="home"),
-    path("products/", views.product_list, name="product_list"),
+    # ... другие пути
     path(
-        "products/<int:product_id>/",
-        views.product_detail,
-        name="product_detail",
-    ),
-    path("products/add/", views.product_add, name="product_add"),
-    path("categories/", views.category_list, name="category_list"),
+        "api/guarded/", views.MyProtectedView.as_view(), name="jwt_guarded"
+    ),  # логин
     path(
-        "categories/<int:category_id>/",
-        views.category_products,
-        name="category_products",
-    ),
+        "api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
+    ),  # логин
+    path(
+        "api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
+    ),  # обновление токена
 ]
