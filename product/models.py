@@ -8,6 +8,24 @@ from django.core.validators import (
 )
 from ckeditor_uploader.fields import RichTextUploadingField
 
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+
+class CustomUser(AbstractUser):
+    # Удаляем username, используем email вместо него
+    email = models.EmailField("email address", unique=True)
+
+    full_name = models.CharField(
+        max_length=150, blank=True, null=True
+    )  # любое доп. поле
+
+    USERNAME_FIELD = "email"  # теперь логинимся по email
+    REQUIRED_FIELDS = []  # username не нужен
+
+    def __str__(self):
+        return self.email
+
 
 # <================> ABSTRACT MODELS <================> #
 # <========> SOCIAL MEDIA MODEL <========> #
@@ -128,7 +146,7 @@ class Gender(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = "Gender"
         verbose_name_plural = "Genders"
@@ -193,7 +211,7 @@ class Author(SocialMedia, models.Model):
         if (today.month, today.day) < (self.birthday.month, self.birthday.day):
             age -= 1
         return age
-    
+
     class Meta:
         verbose_name = "Author"
         verbose_name_plural = "Authors"
@@ -279,11 +297,12 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse("product:product_detail", kwargs={"product_id": self.pk})
-    
+
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
         ordering = ("-created_at",)
+
 
 # <================> PRODUCT IMAGE MODEL <================> #
 class ProductImage(models.Model):
@@ -305,7 +324,7 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} Image"
-    
+
     class Meta:
         verbose_name = "Product Image"
         verbose_name_plural = "Product Images"

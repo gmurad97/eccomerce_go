@@ -60,6 +60,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+AUTH_USER_MODEL = "product.CustomUser"  # замените на имя вашего приложения
+
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
