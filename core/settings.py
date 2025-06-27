@@ -1,3 +1,4 @@
+AUTH_USER_MODEL = "product.CustomUser"
 """
 Django settings for core project.
 
@@ -59,9 +60,6 @@ REST_FRAMEWORK = {
         "product.api.auth.CustomJWTAuthentication",
     ),
 }
-
-AUTH_USER_MODEL = "product.CustomUser"  # замените на имя вашего приложения
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

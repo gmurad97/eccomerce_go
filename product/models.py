@@ -14,6 +14,7 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     # Удаляем username, используем email вместо него
+    username = None
     email = models.EmailField("email address", unique=True)
 
     full_name = models.CharField(
@@ -21,7 +22,7 @@ class CustomUser(AbstractUser):
     )  # любое доп. поле
 
     USERNAME_FIELD = "email"  # теперь логинимся по email
-    REQUIRED_FIELDS = []  # username не нужен
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.email
