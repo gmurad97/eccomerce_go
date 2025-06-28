@@ -30,6 +30,18 @@ SECRET_KEY = (
     "django-insecure-rofj-=$m9r_8@tza_inw$eq&_s5q#noatr)cqbi_svrpv8#sw3"
 )
 
+LANGUAGE_CODE = "en"
+
+LANGUAGES = [
+    ("en", "English"),
+    ("ru", "Russian"),
+    ("az", "Azerbaijani"),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -70,6 +82,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
